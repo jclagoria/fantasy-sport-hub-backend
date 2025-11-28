@@ -1,0 +1,65 @@
+# Configuración específica para pruebas
+server:
+  port: 0  # Puerto aleatorio para pruebas
+
+spring:
+  config:
+    activate:
+      on-profile: test
+  data:
+    mongodb:
+      host: ${SPRING_DATA_MONGODB_HOST:localhost}
+      port: ${SPRING_DATA_MONGODB_PORT:27017}
+      database: ${SPRING_DATA_MONGODB_DATABASE:${SPRING_DATA_MONGODB_DATABASE_TEST:fantasy_sports_hub_test}}
+      authentication-database: ${SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE:admin}
+      username: ${SPRING_DATA_MONGODB_USERNAME:${SPRING_DATA_MONGODB_USERNAME_TEST:testuser}}
+      password: ${SPRING_DATA_MONGODB_PASSWORD:${SPRING_DATA_MONGODB_PASSWORD_TEST:testpass}}
+      auto-index-creation: true
+
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: fantasy-sport-hub-test-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      
+  # Configuración de Redis para pruebas
+  data.redis:
+    host: localhost
+    port: 6379
+    password: your_secure_password_here  # Se espera que se proporcione a través de variables de entorno
+    database: 1  # Usar una base de datos diferente para pruebas
+    timeout: 2000  # 2 segundos de timeout
+    ssl:
+      enabled: false
+
+# Configuración de TestContainers para pruebas
+testcontainers:
+  mongodb:
+    image: mongo:latest
+    expose:
+      - "27017"
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    expose:
+      - "9092"
+  eventstoredb:
+    image: eventstore/eventstore:latest
+    expose:
+      - "2113"
+      - "1113"
+
+# Configuración de logging para pruebas
+logging:
+  level:
+    root: INFO
+    org.springframework.test: DEBUG
+    com.fantasy.sport: DEBUG
+    org.testcontainers: INFO
+    org.mongodb: DEBUG

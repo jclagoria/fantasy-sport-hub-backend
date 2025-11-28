@@ -1,0 +1,90 @@
+# Configuración específica para producción
+server:
+  port: 8080
+  
+spring:
+  config:
+    activate:
+      on-profile: prod
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://prod-user:${MONGODB_PASSWORD}@mongo-prod:27017/fantasy_sports_hub}
+      auto-index-creation: true
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka-prod:9092}
+    consumer:
+      group-id: fantasy-sport-hub-prod-group
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      
+  # Configuración de Redis para producción
+  data.redis:
+    host: ${REDIS_HOST:redis-prod}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}  # Se espera que se proporcione a través de variables de entorno
+    database: 0
+    timeout: 5000  # 5 segundos de timeout en producción
+    ssl:
+      enabled: ${REDIS_SSL_ENABLED:false}
+      properties:
+        spring.json.trusted.packages: "*"
+        security.protocol: SSL
+        ssl.truststore.location: /etc/ssl/certs/kafka.client.truststore.jks
+        ssl.truststore.password: ${KAFKA_SSL_TRUSTSTORE_PASSWORD}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        security.protocol: SSL
+        ssl.truststore.location: /etc/ssl/certs/kafka.client.truststore.jks
+        ssl.truststore.password: ${KAFKA_SSL_TRUSTSTORE_PASSWORD}
+
+# Configuración de EventStoreDB para producción
+eventstore:
+  connection-string: ${EVENTSTORE_CONNECTION_STRING:esdb://prod-user:${EVENTSTORE_PASSWORD}@eventstoredb-prod:2113?tls=true}
+  http-port: 2113
+  tcp-port: 1113
+  username: prod-user
+  password: your_secure_password_here
+
+# Configuración de seguridad
+management:
+  endpoints:
+    web:
+      base-path: /manage
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# Configuración de logging para producción
+logging:
+  level:
+    root: WARN
+    com.fantasy.sport: INFO
+  file:
+    name: /var/log/fantasy-sport-hub/application.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 7
+
+# Configuración de Resilience4j para producción
+resilience4j:
+  circuitbreaker:
+    instances:
+      default:
+        registerHealthIndicator: true
+        slidingWindowSize: 100
+        permittedNumberOfCallsInHalfOpenState: 10
+        slidingWindowType: COUNT_BASED
+        minimumNumberOfCalls: 20
+        waitDurationInOpenState: 30s
+        failureRateThreshold: 50
+  ratelimiter:
+    instances:
+      default:
+        limitForPeriod: 1000
+        limitRefreshPeriod: 1s
+        timeoutDuration: 5s
