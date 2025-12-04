@@ -67,8 +67,10 @@ dependencies {
     implementation 'io.opentelemetry:opentelemetry-exporter-otlp:1.56.0'
 
     // Utilities
-    implementation 'org.projectlombok:lombok:1.18.42'
+    compileOnly 'org.projectlombok:lombok:1.18.42'
+    annotationProcessor 'org.projectlombok:lombok:1.18.42'
     implementation 'org.mapstruct:mapstruct:1.6.3'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
     implementation 'com.google.guava:guava:33.5.0-jre'
 
     // Testing
