@@ -6,6 +6,26 @@ spring:
   config:
     activate:
       on-profile: dev
+
+  # R2DBC Configuration (Reactive PostgreSQL)
+  r2dbc:
+    url: ${DB_HOST_DEV}
+    username: ${DB_USERNAME_DEV}
+    password: ${DB_PASSWORD_DEV}
+    pool:
+      initial-size: 2
+      max-size: 10
+      max-idle-time: 10m
+      max-create-connection-time: 30s
+      max-acquire-time: 30s
+      max-life-time: 30m
+      validation-depth: LOCAL
+    properties:
+      sslMode: ${DB_SSL_MODE_DEV:require}
+      connectTimeout: PT30S
+      statementTimeout: PT60S
+      lockTimeout: PT10S
+
   data:
     mongodb:
       host: ${SPRING_DATA_MONGODB_HOST}
@@ -30,7 +50,7 @@ spring:
       value-serializer: ${SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER}
       
   # Configuración de Redis para desarrollo
-  data.redis:
+  redis:
     host: ${SPRING_DATA_REDIS_HOST}
     port: ${SPRING_DATA_REDIS_PORT}
     password: ${SPRING_DATA_REDIS_PASSWORD}

@@ -69,6 +69,24 @@ management:
       topic-verification:
         enabled: true
 
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-ms: ${JWT_EXPIRATION_MS}
+  issuer: ${JWT_ISSUER}
+  access-token-duration: ${JWT_ACCESS_TOKEN_DURATION}
+  refresh-token-duration: ${JWT_REFRESH_TOKEN_DURATION}
+  private-key-path: ${JWT_PRIVATE_KEY_PATH}
+  public-key-path: ${JWT_PUBLIC_KEY_PATH}
+
+# Password Configuration
+security:
+  password:
+    argon2:
+      iterations: ${ARGON_ITERATIONS}
+      memory: ${ARGON_MEMORY}
+      parallelism: ${ARGON_PARALLELISM}
+
 # Configuración de logging
 logging:
   level:

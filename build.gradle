@@ -73,6 +73,8 @@ dependencies {
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
     implementation 'com.google.guava:guava:33.5.0-jre'
 
+    implementation 'de.mkammerer:argon2-jvm:2.12'
+
     // Testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test:3.8.0'

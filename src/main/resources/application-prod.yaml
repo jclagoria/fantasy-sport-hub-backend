@@ -6,6 +6,26 @@ spring:
   config:
     activate:
       on-profile: prod
+
+  # R2DBC Configuration (Reactive PostgreSQL)
+  r2dbc:
+    url: ${DB_R2DBC_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    pool:
+      initial-size: 2
+      max-size: 10
+      max-idle-time: 10m
+      max-create-connection-time: 30s
+      max-acquire-time: 30s
+      max-life-time: 30m
+      validation-depth: LOCAL
+    properties:
+      sslMode: ${DB_SSL_MODE:require}
+      connectTimeout: PT30S
+      statementTimeout: PT60S
+      lockTimeout: PT10S
+
   data:
     mongodb:
       uri: ${MONGODB_URI:mongodb://prod-user:${MONGODB_PASSWORD}@mongo-prod:27017/fantasy_sports_hub}
@@ -20,7 +40,7 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       
   # Configuración de Redis para producción
-  data.redis:
+  redis:
     host: ${REDIS_HOST:redis-prod}
     port: ${REDIS_PORT:6379}
     password: ${REDIS_PASSWORD:}  # Se espera que se proporcione a través de variables de entorno
