@@ -38,6 +38,10 @@ public class CqrsConfig {
         commandBus.register(StartMatchCommand.class, matchCommandHandler::handleStartMatch);
         commandBus.register(RecordGoalCommand.class, matchCommandHandler::handleRecordGoal);
 
+        // Phase 1: Register authentication handlers
+        // commandBus.register(LoginCommand.class, userCommandHandler::handleLogin);
+        // commandBus.register(LogoutCommand.class, userCommandHandler::handleLogout);
+
         // Register query handlers
         queryBus.register(GetMatchStateQuery.class, matchQueryHandler);
 

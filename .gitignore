@@ -41,3 +41,5 @@ out/
 ### Environment Variables ###
 .env
 !.env.example
+
+/src/main/resources/keys/*.pem

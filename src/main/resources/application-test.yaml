@@ -6,6 +6,26 @@ spring:
   config:
     activate:
       on-profile: test
+
+  # R2DBC Configuration (Reactive PostgreSQL)
+  r2dbc:
+    url: ${DB_R2DBC_URL_TEST}
+    username: ${DB_USERNAME_TEST}
+    password: ${DB_PASSWORD_TEST}
+    pool:
+      initial-size: 2
+      max-size: 10
+      max-idle-time: 10m
+      max-create-connection-time: 30s
+      max-acquire-time: 30s
+      max-life-time: 30m
+      validation-depth: LOCAL
+    properties:
+      sslMode: ${DB_SSL_MODE_TEST:require}
+      connectTimeout: PT30S
+      statementTimeout: PT60S
+      lockTimeout: PT10S
+
   data:
     mongodb:
       host: ${SPRING_DATA_MONGODB_HOST:localhost}
@@ -30,7 +50,7 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       
   # Configuración de Redis para pruebas
-  data.redis:
+  redis:
     host: localhost
     port: 6379
     password: your_secure_password_here  # Se espera que se proporcione a través de variables de entorno
