@@ -2,6 +2,7 @@ package com.fantasysporthub.infrastructure.config;
 
 import com.fantasysporthub.security.JWTAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -21,6 +22,7 @@ public class SecurityConfig {
 
     private final JWTAuthenticationFilter jwtAuthentificationFilter;
 
+    @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
@@ -32,13 +34,14 @@ public class SecurityConfig {
 
                 // Authorization rules
                 .authorizeExchange(exchanges -> exchanges
-                        // Public endpoints (Phase 1: Add /auth/register, /auth/login)
+                        // Public endpoints
+                        .pathMatchers("/auth/register", "/auth/login").permitAll()
                         .pathMatchers("/actuator/health", "/actuator/info").permitAll()
 
-                        // Protected endpoints (Phase 0: Basic pattern)
+                        // Protected endpoints
                         .pathMatchers("/api/**").authenticated()
 
-                        // Admin endpoints (Phase 1: Expand with role-based access)
+                        // Admin endpoints
                         .pathMatchers("/admin/**").hasRole("ADMIN")
 
                         // Default: require authentication

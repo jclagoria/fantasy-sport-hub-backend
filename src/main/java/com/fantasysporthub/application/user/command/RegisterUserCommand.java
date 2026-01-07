@@ -5,18 +5,19 @@ import lombok.Builder;
 
 import java.util.UUID;
 
-/**
- * Command to logout user by blacklisting JWT.
- */
 @Builder
-public record LogoutCommand(
+public record RegisterUserCommand(
         UUID commandId,
-        String refreshToken
-) implements Command<Void> {
+        String email,
+        String password,
+        String displayName,
+        String ipAddress,
+        String userAgent
+) implements Command<UUID> {
 
     @Override
     public UUID getCommandId() {
-        return null;
+        return commandId;
     }
 
     @Override
@@ -26,6 +27,6 @@ public record LogoutCommand(
 
     @Override
     public String getCommandType() {
-        return "";
+        return "RegisterUser";
     }
 }

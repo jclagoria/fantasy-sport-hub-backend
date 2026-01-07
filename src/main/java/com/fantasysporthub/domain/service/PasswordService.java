@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * Password hashing and verification using Argon2id.
@@ -27,22 +28,40 @@ public class PasswordService {
 
     /**
      * Hash password using Argon2id.
-     *
-     * TODO Phase 1: Implement complete hashing logic with memory clearing.
+     * Runs on bounded elastic scheduler to avoid blocking reactor threads.
      */
     public Mono<String> hashPassword(String plainPassword) {
-        // TODO Phase 1: Implement Argon2id hashing
-        return Mono.error(new UnsupportedOperationException("Phase 1 implementation required"));
+        return Mono.fromCallable(() -> {
+                    char[] chars = plainPassword.toCharArray();
+                    try {
+                        return argon2.hash(iterations, memory, parallelism, chars);
+                    } finally {
+                        // Clear sensitive data from memory
+                        argon2.wipeArray(chars);
+                    }
+                })
+                .subscribeOn(Schedulers.boundedElastic())
+                .doOnSuccess(hash -> log.debug("Password hashed successfully"))
+                .doOnError(e -> log.error("Failed to hash password", e));
     }
 
     /**
      * Verify password against hash.
-     *
-     * TODO Phase 1: Implement verification with constant-time comparison.
+     * Constant-time comparison to prevent timing attacks.
      */
     public Mono<Boolean> verifyPassword(String plainPassword, String hash) {
-        // TODO Phase 1: Implement password verification
-        return Mono.error(new UnsupportedOperationException("Phase 1 implementation required"));
+        return Mono.fromCallable(() -> {
+                    char[] chars = plainPassword.toCharArray();
+                    try {
+                        return argon2.verify(hash, chars);
+                    } finally {
+                        // Clear sensitive data from memory
+                        argon2.wipeArray(chars);
+                    }
+                })
+                .subscribeOn(Schedulers.boundedElastic())
+                .doOnSuccess(result -> log.debug("Password verification completed: {}", result))
+                .doOnError(e -> log.error("Failed to verify password", e));
     }
 
 }
