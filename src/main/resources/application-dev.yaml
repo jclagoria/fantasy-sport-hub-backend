@@ -9,7 +9,7 @@ spring:
 
   # R2DBC Configuration (Reactive PostgreSQL)
   r2dbc:
-    url: ${DB_HOST_DEV}
+    url: ${DB_R2DBC_URL_DEV}
     username: ${DB_USERNAME_DEV}
     password: ${DB_PASSWORD_DEV}
     pool:
@@ -69,13 +69,16 @@ eventstore:
   max-discovery-attempts: ${EVENTSTORE_MAX_DISCOVERY_ATTEMPTS}
   discovery-interval-ms: ${EVENTSTORE_DISCOVERY_INTERVAL_MS}
 
-# Health check configuration
+# Health check configuration (validation disabled for dev)
 management:
   endpoint:
     health:
+      validate-group-membership: false
       group:
         readiness:
-          include: readinessState,db,eventstore,kafka
+          include: r2dbc,eventstore,kafka
+        liveness:
+          include: ping
   health:
     eventstore:
       enabled: true

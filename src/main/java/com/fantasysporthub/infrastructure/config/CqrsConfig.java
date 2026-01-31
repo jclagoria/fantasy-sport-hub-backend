@@ -4,6 +4,10 @@ import com.fantasysporthub.application.match.command.MatchCommandHandler;
 import com.fantasysporthub.application.match.projection.MatchProjectionHandler;
 import com.fantasysporthub.application.match.query.GetMatchStateQuery;
 import com.fantasysporthub.application.match.query.MatchQueryHandler;
+import com.fantasysporthub.application.user.command.LoginCommand;
+import com.fantasysporthub.application.user.command.LogoutCommand;
+import com.fantasysporthub.application.user.command.RegisterUserCommand;
+import com.fantasysporthub.application.user.handlers.UserCommandHandler;
 import com.fantasysporthub.cqrs.command.CommandBus;
 import com.fantasysporthub.cqrs.event.EventBus;
 import com.fantasysporthub.cqrs.query.QueryBus;
@@ -31,6 +35,7 @@ public class CqrsConfig {
     private final MatchCommandHandler matchCommandHandler;
     private final MatchQueryHandler matchQueryHandler;
     private final MatchProjectionHandler matchProjectionHandler;
+    private final UserCommandHandler userCommandHandler;
 
     @EventListener(ApplicationReadyEvent.class)
     public void configureCqrs() {
@@ -39,8 +44,9 @@ public class CqrsConfig {
         commandBus.register(RecordGoalCommand.class, matchCommandHandler::handleRecordGoal);
 
         // Phase 1: Register authentication handlers
-        // commandBus.register(LoginCommand.class, userCommandHandler::handleLogin);
-        // commandBus.register(LogoutCommand.class, userCommandHandler::handleLogout);
+        commandBus.register(RegisterUserCommand.class, userCommandHandler::handleRegister);
+        commandBus.register(LoginCommand.class, userCommandHandler::handleLogin);
+        commandBus.register(LogoutCommand.class, userCommandHandler::handleLogout);
 
         // Register query handlers
         queryBus.register(GetMatchStateQuery.class, matchQueryHandler);

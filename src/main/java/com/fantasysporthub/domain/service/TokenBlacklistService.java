@@ -1,7 +1,7 @@
 package com.fantasysporthub.domain.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -13,10 +13,13 @@ import java.time.Duration;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class TokenBlacklistService {
 
     private final ReactiveRedisTemplate<String, String> redisTemplate;
+
+    public TokenBlacklistService(@Qualifier("reactiveRedisTemplate") ReactiveRedisTemplate<String, String> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
 
     private static final String BLACKLIST_PREFIX = "blacklist:";
 

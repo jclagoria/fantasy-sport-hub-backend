@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.5.7'
+	id 'org.springframework.boot' version '4.0.2'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -29,6 +29,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     //kafka
+    implementation 'org.springframework.boot:spring-boot-starter-kafka'
     implementation 'org.apache.kafka:kafka-streams:4.1.1'
     implementation 'org.springframework.kafka:spring-kafka:4.0.0-RC1'
     implementation 'io.projectreactor.kafka:reactor-kafka:1.3.25'
@@ -49,22 +50,25 @@ dependencies {
     // Resilience
     implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.3.0'
     
-    // Environment Variables
-    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+    // Environment Variables (.env file support for Spring Boot 4)
+    implementation 'me.paulschwarz:springboot4-dotenv:5.1.0'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     implementation 'io.github.resilience4j:resilience4j-reactor:2.3.0'
     implementation 'io.github.resilience4j:resilience4j-circuitbreaker:2.3.0'
     implementation 'io.github.resilience4j:resilience4j-ratelimiter:2.3.0'
     implementation 'io.github.resilience4j:resilience4j-retry:2.3.0'
 
-    // Distributed Lock
-    implementation 'org.redisson:redisson-spring-boot-starter:3.52.0'
+    // Distributed Lock (v4.1.0 required for Spring Boot 4.x compatibility)
+    implementation 'org.redisson:redisson-spring-boot-starter:4.1.0'
 
     // Observability
     implementation 'io.micrometer:micrometer-registry-prometheus:1.16.0'
     implementation 'io.opentelemetry:opentelemetry-api:1.56.0'
     implementation 'io.opentelemetry:opentelemetry-sdk:1.56.0'
     implementation 'io.opentelemetry:opentelemetry-exporter-otlp:1.56.0'
+
+    // API Documentation (OpenAPI 3 / Swagger) - v3.x required for Spring Boot 4
+    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:3.0.1'
 
     // Utilities
     compileOnly 'org.projectlombok:lombok:1.18.42'
