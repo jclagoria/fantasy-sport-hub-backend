@@ -10,6 +10,15 @@ import com.fantasysporthub.cqrs.query.QueryBus;
 import com.fantasysporthub.presentation.dto.LoginRequest;
 import com.fantasysporthub.presentation.dto.RegisterRequest;
 import com.fantasysporthub.presentation.dto.TokenResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +46,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Tag(name = "Authentication", description = "User authentication and authorization endpoints using JWT tokens and CQRS pattern")
 public class AuthController {
 
     private final CommandBus commandBus;
@@ -46,9 +56,64 @@ public class AuthController {
      * POST /auth/register
      * Register new user (COMMAND - Write operation).
      */
+    @Operation(
+            summary = "Register new user",
+            description = """
+                    Creates a new user account with email and password authentication.
+
+                    **CQRS Command**: RegisterUserCommand → CommandBus → UserCommandHandler → EventStore
+
+                    **Security**: Passwords are hashed with Argon2id before storage.
+                    **Event Sourcing**: Publishes UserRegistered event to EventStoreDB.
+                    """,
+            security = {}  // No authentication required for registration
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "User successfully registered",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = RegisterResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Successful Registration",
+                                    value = """
+                                            {
+                                              "userId": "550e8400-e29b-41d4-a716-446655440000",
+                                              "email": "user@example.com"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input (validation errors)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "Validation Error",
+                                    value = """
+                                            {
+                                              "timestamp": "2025-01-07T12:00:00Z",
+                                              "status": 400,
+                                              "error": "Bad Request",
+                                              "message": "Email is required"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "User with this email already exists",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<RegisterResponse> register(
+            @Parameter(description = "User registration details", required = true)
             @Valid @RequestBody RegisterRequest request,
             ServerHttpRequest httpRequest
     ) {
@@ -70,8 +135,66 @@ public class AuthController {
      * POST /auth/login
      * Authenticate user and return tokens (COMMAND - Write operation).
      */
+    @Operation(
+            summary = "Authenticate user and obtain JWT tokens",
+            description = """
+                    Authenticates user credentials and returns access and refresh tokens.
+
+                    **CQRS Command**: LoginCommand → CommandBus → UserCommandHandler → EventStore
+
+                    **Returns**:
+                    - Access Token (JWT, 1 hour expiration)
+                    - Refresh Token (stored in PostgreSQL, 7 days expiration)
+
+                    **Event Sourcing**: Publishes LoginSuccessful or LoginFailed events.
+                    """,
+            security = {}  // No authentication required for login
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Authentication successful, tokens returned",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = TokenResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Successful Login",
+                                    value = """
+                                            {
+                                              "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+                                              "refreshToken": "550e8400-e29b-41d4-a716-446655440000",
+                                              "expiresIn": 3600,
+                                              "tokenType": "Bearer",
+                                              "userId": "550e8400-e29b-41d4-a716-446655440000",
+                                              "email": "user@example.com",
+                                              "displayName": "John Doe"
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Invalid credentials",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "Authentication Failed",
+                                    value = """
+                                            {
+                                              "timestamp": "2025-01-07T12:00:00Z",
+                                              "status": 401,
+                                              "error": "Unauthorized",
+                                              "message": "Invalid email or password"
+                                            }
+                                            """
+                            )
+                    )
+            )
+    })
     @PostMapping("/login")
     public Mono<TokenResponse> login (
+            @Parameter(description = "User login credentials", required = true)
             @Valid @RequestBody LoginRequest request,
             ServerHttpRequest httpRequest
             ) {
@@ -101,9 +224,39 @@ public class AuthController {
      * POST /auth/logout
      * Revoke refresh token (COMMAND - Write operation).
      */
+    @Operation(
+            summary = "Logout user and revoke refresh token",
+            description = """
+                    Invalidates the provided refresh token, effectively logging out the user.
+
+                    **CQRS Command**: LogoutCommand → CommandBus → UserCommandHandler
+
+                    **Security**: Requires valid JWT Bearer token.
+                    **Action**: Marks refresh token as revoked in PostgreSQL.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Logout successful, refresh token revoked"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - invalid or missing JWT token",
+                    content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid refresh token",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public Mono<Void> logout(@RequestBody LogoutRequest request) {
+    public Mono<Void> logout(
+            @Parameter(description = "Logout request with refresh token", required = true)
+            @RequestBody LogoutRequest request
+    ) {
         var command = LogoutCommand.builder()
                 .commandId(UUID.randomUUID())
                 .refreshToken(request.refreshToken())
@@ -116,8 +269,50 @@ public class AuthController {
      * GET /auth/validate
      * Validate token (QUERY - Read operation).
      */
+    @Operation(
+            summary = "Validate JWT access token",
+            description = """
+                    Validates the provided JWT access token and returns token claims.
+
+                    **CQRS Query**: ValidateTokenQuery → QueryBus → QueryHandler
+
+                    **Security**: Requires valid JWT Bearer token.
+                    **Returns**: Token validity status and user claims (userId, email, roles).
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Token is valid, claims returned",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ValidationResponse.class),
+                            examples = @ExampleObject(
+                                    name = "Valid Token",
+                                    value = """
+                                            {
+                                              "isValid": true,
+                                              "userId": "550e8400-e29b-41d4-a716-446655440000",
+                                              "email": "user@example.com",
+                                              "roles": ["USER"]
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Invalid or expired token",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
     @GetMapping("/validate")
     public Mono<ValidationResponse> validateToken(
+            @Parameter(
+                    description = "JWT Bearer token in format: Bearer <token>",
+                    required = true,
+                    example = "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+            )
             @RequestHeader("Authorization") String authHeader
     ) {
         var token = authHeader.replace("Bearer ", "");

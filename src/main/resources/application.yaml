@@ -1,8 +1,10 @@
 spring:
   application:
-    name: ${SPRING_APPLICATION_NAME}
+    name: ${SPRING_APPLICATION_NAME:name}
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE}
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  config:
+    import: optional:dotenv:.env
   
   # Configuración común de Redis
   data:
@@ -38,12 +40,15 @@ resilience4j:
 management:
   endpoint:
     health:
+      probes:
+        enabled: false
       show-details: always
+      validate-group-membership: false
       group:
         readiness:
-          include: readinessState,db,eventstore,kafka
+          include: r2dbc,eventstore,kafka
         liveness:
-          include: livenessState
+          include: ping
   endpoints:
     web:
       exposure:
@@ -85,6 +90,20 @@ security:
       iterations: ${ARGON_ITERATIONS}
       memory: ${ARGON_MEMORY}
       parallelism: ${ARGON_PARALLELISM}
+
+# SpringDoc OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operationsSorter: method
+    tagsSorter: alpha
+    display-request-duration: true
+    try-it-out-enabled: true
+  show-actuator: false
 
 # Configuración de logging
 logging:

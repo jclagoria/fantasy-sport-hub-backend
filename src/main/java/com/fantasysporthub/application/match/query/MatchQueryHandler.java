@@ -2,7 +2,7 @@ package com.fantasysporthub.application.match.query;
 
 import com.fantasysporthub.cqrs.query.QueryHandler;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -14,16 +14,14 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class MatchQueryHandler implements QueryHandler<GetMatchStateQuery, MatchProjectionDTO> {
 
-    private final MongoTemplate mongoTemplate;
+    private final ReactiveMongoTemplate mongoTemplate;
 
     @Override
     public Mono<MatchProjectionDTO> handle(GetMatchStateQuery query) {
-        return Mono.fromCallable(() ->
-                mongoTemplate.findById(
-                        query.getMatchId(),
-                        MatchProjectionDTO.class,
-                        "match_projections"
-                )
+        return mongoTemplate.findById(
+                query.getMatchId(),
+                MatchProjectionDTO.class,
+                "match_projections"
         );
     }
 }

@@ -38,6 +38,9 @@ public class SecurityConfig {
                         .pathMatchers("/auth/register", "/auth/login").permitAll()
                         .pathMatchers("/actuator/health", "/actuator/info").permitAll()
 
+                        // OpenAPI / Swagger UI endpoints
+                        .pathMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/webjars/**").permitAll()
+
                         // Protected endpoints
                         .pathMatchers("/api/**").authenticated()
 

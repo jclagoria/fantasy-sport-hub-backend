@@ -17,7 +17,7 @@ public class EventStoreMetrics {
     private final Timer appendDuration;
     private final Timer readDuration;
 
-    public EventStoreMetrics(MeterRegistry registry, Counter eventsStreamed) {
+    public EventStoreMetrics(MeterRegistry registry) {
         this.eventsAppended = Counter.builder("eventstore.events.appended")
                 .description("Total events appended to streams")
                 .tag("component", "eventstore")
