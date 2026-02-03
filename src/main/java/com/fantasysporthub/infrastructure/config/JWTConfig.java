@@ -27,7 +27,7 @@ import java.util.Base64;
 public class JWTConfig {
 
     private String issuer;
-    private Duration accessTokenPrivateDuration;
+    private Duration accessTokenDuration;
     private Duration refreshTokenDuration;
     private String privateKeyPath;
     private String publicKeyPath;
