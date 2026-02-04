@@ -2,6 +2,8 @@ package com.fantasysporthub.domain.model.user;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -28,10 +30,18 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table("refresh_tokens")
-public class RefreshToken {
+public class RefreshToken implements Persistable<UUID> {
 
     @Id
     private UUID id;
+
+    /**
+     * Transient flag to track if entity is new (not yet persisted).
+     * Must be set to true when creating new entities, false when loading from DB.
+     */
+    @Transient
+    @Builder.Default
+    private boolean isNew = true;
 
     @Column("user_id")
     private UUID userId;

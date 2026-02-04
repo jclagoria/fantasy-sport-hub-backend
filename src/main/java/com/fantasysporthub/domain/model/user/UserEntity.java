@@ -3,6 +3,8 @@ package com.fantasysporthub.domain.model.user;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -14,6 +16,10 @@ import java.util.UUID;
  * User entity for authentication and authorization.
  *
  * GDPR Compliance: Minimal data collection (email, password hash, roles)
+ *
+ * Implements Persistable to control new/existing entity detection for R2DBC.
+ * This is required when using application-generated UUIDs as primary keys,
+ * otherwise R2DBC would attempt UPDATE instead of INSERT for new entities.
  */
 @Getter
 @Setter
@@ -21,10 +27,18 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table("users")
-public class UserEntity {
+public class UserEntity implements Persistable<UUID> {
 
     @Id
     private UUID id;
+
+    /**
+     * Transient flag to track if entity is new (not yet persisted).
+     * Must be set to true when creating new entities, false when loading from DB.
+     */
+    @Transient
+    @Builder.Default
+    private boolean isNew = true;
 
     private String email;
 
@@ -67,5 +81,22 @@ public class UserEntity {
         ACTIVE,
         SUSPENDED,
         DELETED
+    }
+
+    /**
+     * Implementation of Persistable interface.
+     * Returns true if entity is new (needs INSERT), false if existing (needs UPDATE).
+     */
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
+
+    /**
+     * Mark entity as persisted (not new).
+     * Call this after loading from database or after successful save.
+     */
+    public void markAsPersisted() {
+        this.isNew = false;
     }
 }

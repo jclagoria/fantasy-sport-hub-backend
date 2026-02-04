@@ -231,7 +231,7 @@ public class AuthController {
 
                     **CQRS Command**: LogoutCommand → CommandBus → UserCommandHandler
 
-                    **Security**: Requires valid JWT Bearer token.
+                    **Security**: Requires valid JWT Bearer token in Authorization header.
                     **Action**: Marks refresh token as revoked in PostgreSQL.
                     """
     )
@@ -251,12 +251,24 @@ public class AuthController {
                     content = @Content(mediaType = "application/json")
             )
     })
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> logout(
+            @Parameter(
+                    description = "JWT Bearer token in format: Bearer <token>",
+                    required = true,
+                    example = "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+            )
+            @RequestHeader("Authorization") String authHeader,
             @Parameter(description = "Logout request with refresh token", required = true)
             @RequestBody LogoutRequest request
     ) {
+        // Validate Bearer token is present (authentication handled by Spring Security)
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return Mono.error(new IllegalArgumentException("Authorization header with Bearer token is required"));
+        }
+
         var command = LogoutCommand.builder()
                 .commandId(UUID.randomUUID())
                 .refreshToken(request.refreshToken())
@@ -276,7 +288,7 @@ public class AuthController {
 
                     **CQRS Query**: ValidateTokenQuery → QueryBus → QueryHandler
 
-                    **Security**: Requires valid JWT Bearer token.
+                    **Security**: Requires valid JWT Bearer token in Authorization header.
                     **Returns**: Token validity status and user claims (userId, email, roles).
                     """
     )
@@ -306,6 +318,7 @@ public class AuthController {
                     content = @Content(mediaType = "application/json")
             )
     })
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/validate")
     public Mono<ValidationResponse> validateToken(
             @Parameter(
@@ -315,6 +328,11 @@ public class AuthController {
             )
             @RequestHeader("Authorization") String authHeader
     ) {
+        // Validate Bearer token format
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return Mono.error(new IllegalArgumentException("Authorization header with Bearer token is required"));
+        }
+
         var token = authHeader.replace("Bearer ", "");
         var query = new ValidateTokenQuery(token);
 

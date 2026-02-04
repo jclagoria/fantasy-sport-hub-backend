@@ -44,7 +44,7 @@ public class JWTService {
     ) {
         return Mono.fromCallable(() -> {
             var now = Instant.now();
-            var expiresAt = now.plus(jwtConfig.getAccessTokenPrivateDuration());
+            var expiresAt = now.plus(jwtConfig.getAccessTokenDuration());
 
             // Convert JSONB roles to List<String> for JWT claim
             var rolesList = RoleConverter.jsonNodeToList(userEntity.getRoles());

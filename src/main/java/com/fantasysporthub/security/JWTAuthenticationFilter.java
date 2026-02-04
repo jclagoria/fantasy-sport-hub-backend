@@ -46,7 +46,12 @@ public class JWTAuthenticationFilter implements WebFilter {
 
         return jwtService.validateToken(token)
                 .flatMap(claims ->
+                        // Check blacklist with fail-open: if Redis is unavailable, assume token is valid
                         tokenBlacklistService.isBlackListed(claims.tokenId())
+                                .onErrorResume(redisError -> {
+                                    log.warn("Redis blacklist check failed (fail-open): {}", redisError.getMessage());
+                                    return Mono.just(Boolean.FALSE); // Fail-open: assume not blacklisted
+                                })
                                 .flatMap(isBlackListed -> {
                                     if (isBlackListed) {
                                         log.warn("Rejected blacklisted token: {}", claims.tokenId());
@@ -63,13 +68,15 @@ public class JWTAuthenticationFilter implements WebFilter {
                                             authorities
                                     );
 
+                                    log.debug("JWT authentication successful for user: {}", claims.email());
+
                                     return chain.filter(exchange)
                                             .contextWrite(ReactiveSecurityContextHolder
                                                     .withAuthentication(authentication));
                                 })
                 )
                 .onErrorResume(e -> {
-                    log.debug("JWT validation failed: {}", e.getMessage());
+                    log.warn("JWT validation failed: {}", e.getMessage());
                     return chain.filter(exchange);
                 });
     }
