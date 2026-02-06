@@ -28,13 +28,8 @@ spring:
 
   data:
     mongodb:
-      host: ${SPRING_DATA_MONGODB_HOST}
-      port: ${SPRING_DATA_MONGODB_PORT}
-      database: ${SPRING_DATA_MONGODB_DATABASE:${SPRING_DATA_MONGODB_DATABASE_DEV}}
-      authentication-database: ${SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE}
-      username: ${SPRING_DATA_MONGODB_USERNAME:${SPRING_DATA_MONGODB_USERNAME_DEV}}
-      password: ${SPRING_DATA_MONGODB_PASSWORD:${SPRING_DATA_MONGODB_PASSWORD_DEV}}
-      auto-index-creation: ${SPRING_DATA_MONGODB_AUTO_INDEX_CREATION}
+      uri: ${MONGODB_URI_DEV}
+      auto-index-creation: ${SPRING_DATA_MONGODB_AUTO_INDEX_CREATION:true}
 
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:}
