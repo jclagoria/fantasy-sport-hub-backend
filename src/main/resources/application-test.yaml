@@ -26,15 +26,28 @@ spring:
       statementTimeout: PT60S
       lockTimeout: PT10S
 
-  data:
+  # MongoDB (test) - Connection (Testcontainers)
+  mongodb:
+    uri: ${MONGODB_URI_TEST:mongodb://localhost:27017/fantasy_sports_hub_test}
     mongodb:
-      host: ${SPRING_DATA_MONGODB_HOST:localhost}
-      port: ${SPRING_DATA_MONGODB_PORT:27017}
-      database: ${SPRING_DATA_MONGODB_DATABASE:${SPRING_DATA_MONGODB_DATABASE_TEST:fantasy_sports_hub_test}}
-      authentication-database: ${SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE:admin}
-      username: ${SPRING_DATA_MONGODB_USERNAME:${SPRING_DATA_MONGODB_USERNAME_TEST:testuser}}
-      password: ${SPRING_DATA_MONGODB_PASSWORD:${SPRING_DATA_MONGODB_PASSWORD_TEST:testpass}}
       auto-index-creation: true
+
+    # Redis (test) - Lettuce connection (Testcontainers)
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST_TEST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT_TEST:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD_TEST:}
+      database: ${SPRING_DATA_REDIS_DATABASE_TEST:0}
+      timeout: ${SPRING_DATA_REDIS_TIMEOUT_TEST:2000}
+      client-name: ${SPRING_DATA_REDIS_CLIENT_NAME_TEST:fantasy-sports-redis-test}
+      ssl:
+        enabled: ${SPRING_DATA_REDIS_SSL_ENABLED_TEST:false}
+      lettuce:
+        pool:
+          max-active: ${SPRING_DATA_REDIS_LETTUCE_POOL_MAX_ACTIVE_TEST:8}
+          max-idle: ${SPRING_DATA_REDIS_LETTUCE_POOL_MAX_IDLE_TEST:8}
+          min-idle: ${SPRING_DATA_REDIS_LETTUCE_POOL_MIN_IDLE_TEST:2}
+          max-wait: ${SPRING_DATA_REDIS_LETTUCE_POOL_MAX_WAIT_TEST:3000ms}
 
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
@@ -48,16 +61,7 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      
-  # Configuración de Redis para pruebas
-  redis:
-    host: localhost
-    port: 6379
-    password: your_secure_password_here  # Se espera que se proporcione a través de variables de entorno
-    database: 1  # Usar una base de datos diferente para pruebas
-    timeout: 2000  # 2 segundos de timeout
-    ssl:
-      enabled: false
+
 
 # Configuración de TestContainers para pruebas
 testcontainers:
