@@ -26,10 +26,29 @@ spring:
       statementTimeout: PT60S
       lockTimeout: PT10S
 
-  data:
+  # MongoDB Atlas (prod) - Connection
+  mongodb:
+    uri: ${MONGODB_URI_PROD}
     mongodb:
-      uri: ${MONGODB_URI:mongodb://prod-user:${MONGODB_PASSWORD}@mongo-prod:27017/fantasy_sports_hub}
       auto-index-creation: true
+
+    # Redis Cloud (prod) - Lettuce connection
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST_PROD}
+      port: ${SPRING_DATA_REDIS_PORT_PROD}
+      username: ${SPRING_DATA_REDIS_USERNAME_PROD}
+      password: ${SPRING_DATA_REDIS_PASSWORD_PROD}
+      database: ${SPRING_DATA_REDIS_DATABASE_PROD}
+      timeout: ${SPRING_DATA_REDIS_TIMEOUT_PROD}
+      client-name: ${SPRING_DATA_REDIS_CLIENT_NAME_PROD}
+      ssl:
+        enabled: ${SPRING_DATA_REDIS_SSL_ENABLED_PROD}
+      lettuce:
+        pool:
+          max-active: ${SPRING_DATA_REDIS_LETTUCE_POOL_MAX_ACTIVE_PROD}
+          max-idle: ${SPRING_DATA_REDIS_LETTUCE_POOL_MAX_IDLE_PROD}
+          min-idle: ${SPRING_DATA_REDIS_LETTUCE_POOL_MIN_IDLE_PROD}
+          max-wait: ${SPRING_DATA_REDIS_LETTUCE_POOL_MAX_WAIT_PROD}
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka-prod:9092}
@@ -37,22 +56,6 @@ spring:
       group-id: fantasy-sport-hub-prod-group
       auto-offset-reset: latest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      
-  # Configuración de Redis para producción
-  redis:
-    host: ${REDIS_HOST:redis-prod}
-    port: ${REDIS_PORT:6379}
-    password: ${REDIS_PASSWORD:}  # Se espera que se proporcione a través de variables de entorno
-    database: 0
-    timeout: 5000  # 5 segundos de timeout en producción
-    ssl:
-      enabled: ${REDIS_SSL_ENABLED:false}
-      properties:
-        spring.json.trusted.packages: "*"
-        security.protocol: SSL
-        ssl.truststore.location: /etc/ssl/certs/kafka.client.truststore.jks
-        ssl.truststore.password: ${KAFKA_SSL_TRUSTSTORE_PASSWORD}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -60,6 +63,8 @@ spring:
         security.protocol: SSL
         ssl.truststore.location: /etc/ssl/certs/kafka.client.truststore.jks
         ssl.truststore.password: ${KAFKA_SSL_TRUSTSTORE_PASSWORD}
+        value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
 
 # Configuración de EventStoreDB para producción
 eventstore:

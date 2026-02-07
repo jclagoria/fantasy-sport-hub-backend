@@ -5,17 +5,6 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:dev}
   config:
     import: optional:dotenv:.env
-  
-  # Configuración común de Redis
-  data:
-    redis:
-      host: ${SPRING_DATA_REDIS_HOST}
-      port: ${SPRING_DATA_REDIS_PORT}
-      password: ${SPRING_DATA_REDIS_PASSWORD}
-      database: ${SPRING_DATA_REDIS_DATABASE}
-      timeout: ${SPRING_DATA_REDIS_TIMEOUT}
-      ssl:
-        enabled: ${SPRING_DATA_REDIS_SSL_ENABLED}
 
 # Configuración común de Resilience4j
 resilience4j:

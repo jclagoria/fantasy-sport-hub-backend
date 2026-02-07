@@ -58,9 +58,6 @@ dependencies {
     implementation 'io.github.resilience4j:resilience4j-ratelimiter:2.3.0'
     implementation 'io.github.resilience4j:resilience4j-retry:2.3.0'
 
-    // Distributed Lock (v4.1.0 required for Spring Boot 4.x compatibility)
-    implementation 'org.redisson:redisson-spring-boot-starter:4.1.0'
-
     // Observability
     implementation 'io.micrometer:micrometer-registry-prometheus:1.16.0'
     implementation 'io.opentelemetry:opentelemetry-api:1.56.0'

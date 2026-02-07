@@ -26,15 +26,28 @@ spring:
       statementTimeout: PT60S
       lockTimeout: PT10S
 
-  data:
-    mongodb:
-      host: ${SPRING_DATA_MONGODB_HOST}
-      port: ${SPRING_DATA_MONGODB_PORT}
-      database: ${SPRING_DATA_MONGODB_DATABASE:${SPRING_DATA_MONGODB_DATABASE_DEV}}
-      authentication-database: ${SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE}
-      username: ${SPRING_DATA_MONGODB_USERNAME:${SPRING_DATA_MONGODB_USERNAME_DEV}}
-      password: ${SPRING_DATA_MONGODB_PASSWORD:${SPRING_DATA_MONGODB_PASSWORD_DEV}}
-      auto-index-creation: ${SPRING_DATA_MONGODB_AUTO_INDEX_CREATION}
+  # MongoDB Atlas (dev) - Connection
+  mongodb:
+    uri: ${MONGODB_URI_DEV}
+    auto-index-creation: ${SPRING_DATA_MONGODB_AUTO_INDEX_CREATION:true}
+
+    # Redis Cloud (dev) - Lettuce connection
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST_DEV}
+      port: ${SPRING_DATA_REDIS_PORT_DEV}
+      username: ${SPRING_DATA_REDIS_USERNAME_DEV}
+      password: ${SPRING_DATA_REDIS_PASSWORD_DEV}
+      database: ${SPRING_DATA_REDIS_DATABASE_DEV}
+      timeout: ${SPRING_DATA_REDIS_TIMEOUT_DEV}
+      client-name: ${SPRING_DATA_REDIS_CLIENT_NAME_DEV}
+      ssl:
+        enabled: ${SPRING_DATA_REDIS_SSL_ENABLED_DEV}
+      lettuce:
+        pool:
+          max-active: ${SPRING_DATA_REDIS_LETTUCE_POOL_MAX_ACTIVE_DEV}
+          max-idle: ${SPRING_DATA_REDIS_LETTUCE_POOL_MAX_IDLE_DEV}
+          min-idle: ${SPRING_DATA_REDIS_LETTUCE_POOL_MIN_IDLE_DEV}
+          max-wait: ${SPRING_DATA_REDIS_LETTUCE_POOL_MAX_WAIT_DEV}
 
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:}
@@ -48,16 +61,7 @@ spring:
     producer:
       key-serializer: ${SPRING_KAFKA_PRODUCER_KEY_SERIALIZER}
       value-serializer: ${SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER}
-      
-  # Configuración de Redis para desarrollo
-  redis:
-    host: ${SPRING_DATA_REDIS_HOST}
-    port: ${SPRING_DATA_REDIS_PORT}
-    password: ${SPRING_DATA_REDIS_PASSWORD}
-    database: ${SPRING_DATA_REDIS_DATABASE}
-    timeout: ${SPRING_DATA_REDIS_TIMEOUT}  # 2 segundos de timeout
-    ssl:
-      enabled: ${SPRING_DATA_REDIS_SSL_ENABLED}
+
 
 # Configuración de EventStoreDB para desarrollo
 eventstore:
