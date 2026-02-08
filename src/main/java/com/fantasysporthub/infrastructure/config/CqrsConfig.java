@@ -8,6 +8,9 @@ import com.fantasysporthub.application.user.command.LoginCommand;
 import com.fantasysporthub.application.user.command.LogoutCommand;
 import com.fantasysporthub.application.user.command.RegisterUserCommand;
 import com.fantasysporthub.application.user.handlers.UserCommandHandler;
+import com.fantasysporthub.application.user.handlers.UserQueryHandler;
+import com.fantasysporthub.application.user.query.GetUserByEmailQuery;
+import com.fantasysporthub.application.user.query.ValidateTokenQuery;
 import com.fantasysporthub.cqrs.command.CommandBus;
 import com.fantasysporthub.cqrs.event.EventBus;
 import com.fantasysporthub.cqrs.query.QueryBus;
@@ -36,6 +39,7 @@ public class CqrsConfig {
     private final MatchQueryHandler matchQueryHandler;
     private final MatchProjectionHandler matchProjectionHandler;
     private final UserCommandHandler userCommandHandler;
+    private final UserQueryHandler userQueryHandler;
 
     @EventListener(ApplicationReadyEvent.class)
     public void configureCqrs() {
@@ -50,6 +54,8 @@ public class CqrsConfig {
 
         // Register query handlers
         queryBus.register(GetMatchStateQuery.class, matchQueryHandler);
+        queryBus.register(ValidateTokenQuery.class, userQueryHandler::handle);
+        queryBus.register(GetUserByEmailQuery.class, userQueryHandler::handle);
 
         // Register event handlers (projections)
         eventBus.subscribe(MatchStarted.class, matchProjectionHandler::handleMatchStarted);

@@ -1,5 +1,7 @@
 package com.fantasysporthub.infrastructure.config;
 
+import com.fantasysporthub.domain.service.JWTService;
+import com.fantasysporthub.domain.service.TokenBlacklistService;
 import com.fantasysporthub.security.JWTAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +25,8 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JWTAuthenticationFilter jwtAuthentificationFilter;
+    private final JWTService jwtService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
@@ -64,9 +67,19 @@ public class SecurityConfig {
                         .anyExchange().authenticated()
                 )
 
-                // Add JWT authentication filter BEFORE authorization
-                .addFilterAt(jwtAuthentificationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+                // Add JWT authentication filter ONLY in the security chain (not as global WebFilter)
+                .addFilterAt(jwtAuthenticationFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();
+    }
+
+    /**
+     * Create JWTAuthenticationFilter bean explicitly to avoid double registration.
+     * NOT annotated with @Component to prevent Spring from also registering it
+     * as a global WebFilter (which would cause the filter to execute twice).
+     */
+    @Bean
+    public JWTAuthenticationFilter jwtAuthenticationFilter() {
+        return new JWTAuthenticationFilter(jwtService, tokenBlacklistService);
     }
 
     /**

@@ -255,17 +255,13 @@ public class AuthController {
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> logout(
-            @Parameter(
-                    description = "JWT Bearer token in format: Bearer <token>",
-                    required = true,
-                    example = "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
-            )
+            @Parameter(hidden = true)
             @RequestHeader("Authorization") String authHeader,
             @Parameter(description = "Logout request with refresh token", required = true)
             @RequestBody LogoutRequest request
     ) {
-        // Validate Bearer token is present (authentication handled by Spring Security)
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        // Validate Authorization header is present (authentication handled by Spring Security)
+        if (authHeader == null || authHeader.isBlank()) {
             return Mono.error(new IllegalArgumentException("Authorization header with Bearer token is required"));
         }
 
@@ -321,19 +317,18 @@ public class AuthController {
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/validate")
     public Mono<ValidationResponse> validateToken(
-            @Parameter(
-                    description = "JWT Bearer token in format: Bearer <token>",
-                    required = true,
-                    example = "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
-            )
+            @Parameter(hidden = true)
             @RequestHeader("Authorization") String authHeader
     ) {
-        // Validate Bearer token format
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        // Validate Authorization header is present
+        if (authHeader == null || authHeader.isBlank()) {
             return Mono.error(new IllegalArgumentException("Authorization header with Bearer token is required"));
         }
 
-        var token = authHeader.replace("Bearer ", "");
+        // Extract token: support both "Bearer <token>" and raw "<token>" formats
+        var token = authHeader.startsWith("Bearer ")
+                ? authHeader.substring("Bearer ".length())
+                : authHeader;
         var query = new ValidateTokenQuery(token);
 
         return queryBus.dispatch(query)
