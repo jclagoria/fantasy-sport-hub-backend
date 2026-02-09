@@ -8,21 +8,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
-
-import java.util.stream.Collectors;
 
 
 /**
  * JWT authentication filter for Spring WebFlux.
  */
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class JWTAuthenticationFilter implements WebFilter {
 
@@ -37,12 +32,15 @@ public class JWTAuthenticationFilter implements WebFilter {
                 .getHeaders()
                 .getFirst(HttpHeaders.AUTHORIZATION);
 
-        // Skip if no Authorization header or not Bearer token
-        if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
+        // Skip if no Authorization header
+        if (authHeader == null || authHeader.isBlank()) {
             return chain.filter(exchange);
         }
 
-        var token = authHeader.substring(BEARER_PREFIX.length());
+        // Extract token: support both "Bearer <token>" and raw "<token>" formats
+        var token = authHeader.startsWith(BEARER_PREFIX)
+                ? authHeader.substring(BEARER_PREFIX.length())
+                : authHeader;
 
         return jwtService.validateToken(token)
                 .flatMap(claims ->
