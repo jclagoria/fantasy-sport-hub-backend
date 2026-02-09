@@ -15,11 +15,11 @@ spring:
     pool:
       initial-size: 2
       max-size: 10
-      max-idle-time: 10m
+      max-idle-time: 2m
       max-create-connection-time: 30s
       max-acquire-time: 30s
-      max-life-time: 30m
-      validation-depth: LOCAL
+      max-life-time: 10m
+      validation-depth: REMOTE
     properties:
       sslMode: ${DB_SSL_MODE_DEV:require}
       connectTimeout: PT30S

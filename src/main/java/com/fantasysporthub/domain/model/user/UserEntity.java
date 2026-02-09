@@ -1,10 +1,10 @@
 package com.fantasysporthub.domain.model.user;
 
+import com.fantasysporthub.domain.model.ManagedPersistable;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
-import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -27,7 +27,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table("users")
-public class UserEntity implements Persistable<UUID> {
+public class UserEntity implements ManagedPersistable<UUID> {
 
     @Id
     private UUID id;
@@ -92,11 +92,8 @@ public class UserEntity implements Persistable<UUID> {
         return isNew;
     }
 
-    /**
-     * Mark entity as persisted (not new).
-     * Call this after loading from database or after successful save.
-     */
-    public void markAsPersisted() {
+    @Override
+    public void markAsExisting() {
         this.isNew = false;
     }
 }

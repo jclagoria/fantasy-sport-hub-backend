@@ -1,10 +1,9 @@
 package com.fantasysporthub.infrastructure.config;
 
-import com.fantasysporthub.domain.model.user.UserEntity;
+import com.fantasysporthub.domain.model.ManagedPersistable;
 import com.fantasysporthub.infrastructure.persistence.converter.JsonNodeReadConverter;
 import com.fantasysporthub.infrastructure.persistence.converter.JsonNodeWriteConverter;
 import io.r2dbc.spi.ConnectionFactory;
-import org.reactivestreams.Publisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
@@ -12,7 +11,6 @@ import org.springframework.data.r2dbc.convert.R2dbcCustomConversions;
 import org.springframework.data.r2dbc.dialect.DialectResolver;
 import org.springframework.data.r2dbc.dialect.R2dbcDialect;
 import org.springframework.data.r2dbc.mapping.event.AfterConvertCallback;
-import org.springframework.data.relational.core.sql.SqlIdentifier;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -48,17 +46,19 @@ public class R2dbcConfig extends AbstractR2dbcConfiguration {
     }
 
     /**
-     * Callback to mark UserEntity as persisted after loading from database.
-     * This ensures that subsequent save() calls perform UPDATE instead of INSERT.
+     * Generic callback to mark all ManagedPersistable entities as existing after loading from database.
+     * <p>
+     * R2DBC does not populate @Transient fields when loading entities, so the isNew flag
+     * retains its default value (true). This callback sets isNew=false for all loaded entities,
+     * ensuring that subsequent save() calls perform UPDATE instead of INSERT.
+     * <p>
+     * Any new entity implementing ManagedPersistable is automatically handled.
      */
     @Bean
-    public AfterConvertCallback<UserEntity> userEntityAfterConvertCallback() {
-        return new AfterConvertCallback<>() {
-            @Override
-            public Publisher<UserEntity> onAfterConvert(UserEntity entity, SqlIdentifier table) {
-                entity.markAsPersisted();
-                return Mono.just(entity);
-            }
+    public AfterConvertCallback<ManagedPersistable<?>> managedPersistableAfterConvertCallback() {
+        return (entity, table) -> {
+            entity.markAsExisting();
+            return Mono.just(entity);
         };
     }
 }

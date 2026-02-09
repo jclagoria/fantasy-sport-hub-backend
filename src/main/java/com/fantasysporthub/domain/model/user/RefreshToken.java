@@ -1,9 +1,9 @@
 package com.fantasysporthub.domain.model.user;
 
+import com.fantasysporthub.domain.model.ManagedPersistable;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
-import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -30,7 +30,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table("refresh_tokens")
-public class RefreshToken implements Persistable<UUID> {
+public class RefreshToken implements ManagedPersistable<UUID> {
 
     @Id
     private UUID id;
@@ -112,5 +112,10 @@ public class RefreshToken implements Persistable<UUID> {
     public void revoke() {
         this.revoked = true;
         this.revokedAt = Instant.now();
+    }
+
+    @Override
+    public void markAsExisting() {
+        this.isNew = false;
     }
 }
